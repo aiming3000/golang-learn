@@ -1,0 +1,61 @@
+syntax = "proto3";
+
+package product_srv;
+
+option go_package = ".;product_srv";
+
+service Products{
+  rpc ProductList(ProductsRequest) returns (ProductsResponse) {}
+  rpc ProductAdd(ProductAddRequest) returns (productAddResponse) {}
+}
+
+message ProductsRequest{
+  int32 current_page = 1;
+  int32 page_size = 2;
+}
+
+message ProductsResponse{
+  int32 code = 1;
+  string msg = 2;
+  repeated Product products = 3;
+  int32 total = 4;
+  int32 current = 5;
+  int32 page_size = 6;
+}
+
+message Product{
+  int32 id = 1;
+  string name = 2;
+  float price = 3;
+  int32 num = 4;
+  string unit = 5;
+  string pic = 6;
+  string desc = 7;
+  string create_time = 8;
+}
+
+message ProductAddRequest{
+  string name = 1;
+  float price = 2;
+  int32 num = 3;
+  string unit = 4;
+  string pic = 5;
+  string desc = 6;
+  string create_time = 7;
+}
+
+message productAddResponse{
+  int32 code = 1;
+  string msg = 2;
+}
+
+// 在main.go同级目录下执行
+// protoc --go_out=. --micro_out=. proto/product/product.proto
+
+//在.proto 文件同级目录下执行
+//protoc --go_out=. --micro_out=. admin_user.proto
+//或者
+//protoc --proto_path=. --micro_out=. --go_out=. *.proto
+
+
+
