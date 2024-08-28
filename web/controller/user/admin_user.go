@@ -7,6 +7,9 @@ import (
 	"go-micro.dev/v4"
 	user_serve "mall/user_serve/proto/admin_user"
 	"net/http"
+	//etcd1
+	"github.com/go-micro/plugins/v4/registry/etcd"
+	"go-micro.dev/v4/registry"
 )
 
 func Index(c *gin.Context) {
@@ -20,9 +23,15 @@ func AdminLogin(c *gin.Context) {
 	password := c.PostForm("password")
 	fmt.Println(username, password)
 
+	// etcd 2
+	registerReg := etcd.NewRegistry(
+		registry.Addrs("127.0.0.1:2379"),
+	)
+
 	//service := micro.NewService()
 	service := micro.NewService(
 		micro.Client(grpc.NewClient()),
+		micro.Registry(registerReg), //注册中心
 	)
 	service.Init()
 	// 创建微服务客户端
