@@ -7,6 +7,10 @@ import (
 )
 
 func InitRouter(router *gin.Engine) {
+
+	router.GET("ping", func(context *gin.Context) {
+		context.JSON(200, "success")
+	})
 	user_group := router.Group("/user")
 
 	product_group := router.Group("/product")

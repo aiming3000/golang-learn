@@ -6,6 +6,7 @@ import (
 	"github.com/go-micro/plugins/v4/client/grpc"
 	"go-micro.dev/v4"
 	user_serve "mall/user_serve/proto/admin_user"
+	"mall/web/utils"
 	"net/http"
 	//etcd1
 	"github.com/go-micro/plugins/v4/registry/etcd"
@@ -18,9 +19,9 @@ func Index(c *gin.Context) {
 	})
 }
 
-func AdminLogin(c *gin.Context) {
-	username := c.PostForm("username")
-	password := c.PostForm("password")
+func AdminLogin(ctx *gin.Context) {
+	username := ctx.PostForm("username")
+	password := ctx.PostForm("password")
 	fmt.Println(username, password)
 
 	// etcd 2
@@ -42,21 +43,33 @@ func AdminLogin(c *gin.Context) {
 	//	Name: c.Query("key"),
 	//})
 
-	rsp, err := client.AdminUserlogin(c, &user_serve.AdminUserRequest{
+	rep, err := client.AdminUserlogin(ctx, &user_serve.AdminUserRequest{
 		Username: username,
 		Password: password,
 	})
 
 	if err != nil {
-		c.JSON(200, gin.H{
-			"code": 500,
-			"msg":  err.Error(),
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": rep.Code,
+			"msg":  rep.Msg,
 		})
-		return
+
+	} else {
+		admin_token, err1 := utils.GenToken(username, utils.AdminUserExpireDuration, utils.AdminUserSecretKey)
+		if err1 != nil {
+			ctx.JSON(http.StatusOK, gin.H{
+				"code": rep.Code,
+				"msg":  rep.Msg,
+			})
+		} else {
+			ctx.JSON(http.StatusOK, gin.H{
+				"code":        rep.Code,
+				"msg":         rep.Msg,
+				"user_name":   username,
+				"admin_token": admin_token,
+			})
+		}
+
 	}
 
-	c.JSON(200, gin.H{
-		"code": 200,
-		"msg":  rsp.Msg,
-	})
 }
